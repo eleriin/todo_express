@@ -15,15 +15,16 @@ const readFile = (filename)=>{
             return;
           }
         //task list data from file
-    const tasks = data.split('\n')
+    const tasks = JSON.parse(data)
     resolve(tasks)
         });
     })
 }
 app.get('/',(req, res)=>{
   //tasks list data from file
-  readFile('./tasks')
-    .then(tasks => {   
+  readFile('./tasks.json')
+    .then(tasks => { 
+        console.log(tasks)  
     res.render('index', {tasks: tasks})
 });
 });
@@ -35,13 +36,33 @@ app.post('/',(req,res) =>{
     //task list data from file
     readFile('./tasks')
     .then(tasks =>{
-        //add form sent task to tasks array
-        tasks.push(req.body.task)
-        const data = tasks.join('\n')
+        //add new task
+        //create new id automatically
+        let index
+        if(tasks.lenght === 0)
+        {
+            index=0
+        } else {
+            index = tasks [ tasks.lenght-1].id +1;
+        }
+        //create task object
+        const newTask = {
+            "id": index,
+            "task":task
+        }
+        console.log(newTask)
+        //add from sent task to task array
+        tasks.push(newTask)
+        console.log(tasks)
+        data= JSON.stringify(tasks, null, 2)
+        console.log(data)
+        
         fs.writeFile("./tasks",data, err => {
             if (err){
                 console.error(err);
                 return;
+            } else{
+                console.log('saved')
             }
             //redirect to / to see result
             res.redirect('/')
