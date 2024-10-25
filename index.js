@@ -40,18 +40,33 @@ app.get('',(req, res)=>{
   //tasks list data from file
   readFile('./tasks.json')
     .then(tasks => { 
-        console.log(tasks)  
-    res.render('index', {tasks: tasks})
-});
-});
+        res.render('index', {
+            tasks:tasks,
+            error: null
+        })
+    })  
+    })
 
 // for parsing applivation/x/www-form-urlencoded
 app.use(express.urlencoded({extended:true}));
 
 app.post('/',(req,res) =>{
     //task list data from file
+    let error = null
+    if(req.body.task.trim().length == 0){
+        error = 'Please insert correct task data'                                               
     readFile('./tasks.json')
     .then(tasks =>{
+        res.render('index',{
+            tasks: tasks,
+            error: error 
+        })
+        })
+    } else {
+        // tasks list data from file
+        readFile('./tasks.json')
+        .then(tasks =>{
+    
         //add new task
         //create new id automatically
         let index
@@ -69,15 +84,13 @@ app.post('/',(req,res) =>{
         console.log(newTask)
         //add from sent task to task array
         tasks.push(newTask)
-        console.log(tasks)
-        const data= JSON.stringify(tasks, null, 2)
-        console.log(data)
-
+        data = JSON.stringify(tasks, null, 2)
         writeFile('./tasks.json', data)
-            //redirect to / to see result
-            res.redirect('/')
+        res.redirect('/')
     })
+}{}
     })
+    
 
 app.get('/delete-task/:taskId',(req,res) => {
     let deletedTaskId = parseInt(req.params.taskId)
